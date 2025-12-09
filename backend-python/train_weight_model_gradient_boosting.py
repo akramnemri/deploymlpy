@@ -67,15 +67,15 @@ print(f"Shape after NaN drop: {df.shape}")
 if df.empty:
     raise ValueError("All rows were dropped due to NaN in predicted_weight!")
 
-# === 5. Prepare features and target ===
-X = df[['days_future', 'steps', 'Calories_Burned', 'Workout_Type']]
+# === 5. Prepare features and target === (FIX: Added 'Weight (kg)')
+X = df[['days_future', 'steps', 'Calories_Burned', 'Workout_Type', 'Weight (kg)']]
 y = df['predicted_weight']
 
 # === 6. Split data for evaluation ===
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# === 7. Build pipeline with Gradient Boosting ===
-numeric_features = ['days_future', 'steps', 'Calories_Burned']
+# === 7. Build pipeline with Gradient Boosting === (FIX: Added 'Weight (kg)' to numeric_features)
+numeric_features = ['days_future', 'steps', 'Calories_Burned', 'Weight (kg)']
 categorical_features = ['Workout_Type']
 
 preprocessor = ColumnTransformer(
