@@ -3,6 +3,11 @@ import pickle
 import requests
 from io import BytesIO
 
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
+
 # HuggingFace raw URLs for each model
 MODEL_URLS = {
     "calories": "https://huggingface.co/Hushfire/fitness-ml-model/resolve/main/calories_model_gradient_boosting.pkl",
@@ -16,8 +21,7 @@ MODEL_URLS = {
     "calories_svm": "https://huggingface.co/Hushfire/fitness-ml-model/resolve/main/calories_model_svm.pkl",
     "weight_svm": "https://huggingface.co/Hushfire/fitness-ml-model/resolve/main/weight_model_svm.pkl",
     "weight_gradient_boosting": "https://huggingface.co/Hushfire/fitness-ml-model/resolve/main/weight_model_gradient_boosting.pkl",
-    "model": "https://huggingface.co/Hushfire/fitness-ml-model/resolve/main/model.pkl",
-    "encoder": "https://huggingface.co/Hushfire/fitness-ml-model/resolve/main/workout_encoder.pkl"
+    "model": "https://huggingface.co/Hushfire/fitness-ml-model/resolve/main/model.pkl"
 }
 
 def download_model(url):
