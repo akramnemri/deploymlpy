@@ -33,15 +33,24 @@ from routes.plan_week import plan_bp
 from routes.workout import workout_bp
 
 # ---------------------------------------------------
-# 4. Inject models into MODULES (not just blueprints)
+# 4. Inject models into MODULES (only if available)
 # ---------------------------------------------------
-routes.calories.model = models.get("calories")
-routes.weight.model = models.get("weight")
-routes.recommend.rules = models.get("rules")
+# safe assignment for optional models
+routes.calories.model = models.get("calories") if models.get("calories") is not None else None
+routes.weight.model = models.get("weight") if models.get("weight") is not None else None
+routes.recommend.rules = models.get("rules") if models.get("rules") is not None else None
 
-if models.get("ml"):
-    routes.recommend_ml.model = models["ml"]
-    routes.recommend_ml.encoder = models["encoder"]
+# For ML endpoints, require both model and encoder to be present
+ml_model = models.get("ml")
+encoder = models.get("encoder")
+if ml_model is not None and encoder is not None:
+    routes.recommend_ml.model = ml_model
+    routes.recommend_ml.encoder = encoder
+else:
+    # leave attributes unset (or explicitly set to None) so route handlers can respond cleanly
+    routes.recommend_ml.model = None
+    routes.recommend_ml.encoder = None
+    print("⚠️ ML model and/or encoder not available. /api/recommend-ml will return a safe error response until both are present.")
 
 # ---------------------------------------------------
 # 5. Register blueprints
@@ -56,13 +65,16 @@ app.register_blueprint(workout_bp, url_prefix="/api/workout")
 
 @app.route("/api/status")
 def status():
+    loaded = [k for k, v in models.items() if v is not None]
     return {
         "status": "OK",
-        "models_loaded": list(models.keys())
+        "models_loaded": loaded
     }
 
 if __name__ == "__main__":
-    print("✅ Models loaded:", list(models.keys()))
+    print("✅ Models keys present:", list(models.keys()))
     print(f"🔥 Calories model ready: {routes.calories.model is not None}")
     print(f"🔥 Weight model ready: {routes.weight.model is not None}")
+    print(f"🔥 Rules model ready: {routes.recommend.rules is not None}")
+    print(f"🔥 ML model+encoder ready: {routes.recommend_ml.model is not None and routes.recommend_ml.encoder is not None}")
     app.run(host="0.0.0.0", port=5000, debug=True)
